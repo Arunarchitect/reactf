@@ -1,18 +1,37 @@
-import {Box, Typography, Grid, TableContainer, Table, Paper, Avatar,  TableCell, TableHead, TableBody, TableRow, TextField, FormControl, InputLabel, MenuItem, Select,FormControlLabel, Radio, FormLabel, RadioGroup,} from '@mui/material'
+import {Box, Typography, Grid, TableContainer, Table, Paper, Avatar,  TableCell, TableHead, TableBody, TableRow, TextField, FormControl, InputLabel, MenuItem, Select,FormControlLabel, Radio, FormLabel, RadioGroup, FormGroup, Checkbox, Stack, Button } from '@mui/material'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { useState } from 'react';
+import {styled} from '@mui/material/styles'
 
 
 
 
 function App() {
   // eslint-disable-next-line
+  const Input = styled('input')({
+    display:'none',
+  })
+
+
+
+
+  // eslint-disable-next-line
   const [name, setName] = useState()
   // eslint-disable-next-line
   const [email, setEmail] = useState()
+  // eslint-disable-next-line
+  const [gender, setGender] = useState()
   const [dob, setDob]= useState(null)
   const [st, setSt] = useState('')
+  // eslint-disable-next-line
+  const [pjl, setPjl] = useState([])
+  // eslint-disable-next-line
+  const getPjl = (e) =>{
+    let data = pjl
+    data.push(e.target.value)
+    setPjl(data)
+  } 
 
   
 
@@ -30,7 +49,7 @@ function App() {
               id="name" name='name' required fullWidth margin='normal' label='Name' onChange={(e)=>{setName(e.target.value)}}
             />
             <TextField
-              id="email" name='email' required fullWidth margin='normal' label='Email'  onChange={(e)=>{setEmail(e.target.value)}}
+              id="email" email='email' required fullWidth margin='normal' label='Email'  onChange={(e)=>{setEmail(e.target.value)}}
             />
             <Box mt={2}>
               <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -47,10 +66,32 @@ function App() {
             </FormControl>
             <FormControl fullWidth margin='normal'>
               <FormLabel id='gender-radio'>Gender</FormLabel>
-                <RadioGroup >
-                  <FormControlLabel value="male" control={<Radio />}>Male</FormControlLabel>
+                <RadioGroup row name='gender'>
+                  <FormControlLabel value="male" control={<Radio />} label='Male' onChange={(e)=> setGender(e.target.value)}/>
+                  <FormControlLabel value="female" control={<Radio />} label='Female'  onChange={(e)=> setGender(e.target.value)}/>
+                  <FormControlLabel value="others" control={<Radio />} label='Others'  onChange={(e)=> setGender(e.target.value)}/>
                 </RadioGroup>
-              </FormControl>          
+              </FormControl>
+              <FormControl component='fieldset' fullWidth margin='normal'>
+                <FormLabel component='legend'>Preferred Job Location</FormLabel>
+                <FormGroup row>
+                  <FormControlLabel control={<Checkbox/>} label='Kollam' value='kollam' onChange={(e) => getPjl(e)}/>
+                  <FormControlLabel control={<Checkbox/>} label='Kochi' value='kochi' onChange={(e) => getPjl(e)}/>
+                </FormGroup>
+              </FormControl>
+              <Stack direction='row' alignItems='center' spacing={4}>
+                <label htmlFor="profile-photo">
+                  <Input accept="image/*" id='profile-photo' type="file" />
+                  <Button variant='contained' component='span'>Upload Photo</Button>
+                </label>
+                <label htmlFor="resume-file">
+                  <Input accept="doc/*" id='resume-file' type="file" />
+                  <Button variant='contained' component='span'>Upload File</Button>
+                </label>
+              </Stack>
+              <Box>
+                <Button type='submit' variant='contained' sx={{mt:3, mb:2, px:5}} color='error'>Submit</Button>  
+              </Box>          
           </Box>
         </Grid>
         <Grid item xs={7}>
