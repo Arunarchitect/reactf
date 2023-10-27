@@ -1,8 +1,10 @@
-import {Box, Typography, Grid, TableContainer, Table, Paper, Avatar,  TableCell, TableHead, TableBody, TableRow, TextField, FormControl, InputLabel, MenuItem, Select,FormControlLabel, Radio, FormLabel, RadioGroup, FormGroup, Checkbox, Stack, Button } from '@mui/material'
+import {Box, Typography, Grid, TableContainer, Table, Paper, Avatar,  TableCell, TableHead, TableBody, TableRow, TextField, FormControl, InputLabel, MenuItem, Select,FormControlLabel, Radio, FormLabel, RadioGroup, FormGroup, Checkbox, Stack, Button , Alert} from '@mui/material'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { useState } from 'react';
 import {styled} from '@mui/material/styles'
+import { parseISO, format } from 'date-fns';
+
 
 
 
@@ -27,15 +29,63 @@ function App() {
   // eslint-disable-next-line
   const [pjl, setPjl] = useState([])
   // eslint-disable-next-line
+  const [pimage, setPimage] = useState('')
+  // eslint-disable-next-line
+  const [rdoc, setRdoc] = useState('')
+  // eslint-disable-next-line
+  const [error, setError]= useState({
+    status:false,
+    msg:"",
+    type:"",
+  })
   const getPjl = (e) =>{
     let data = pjl
     data.push(e.target.value)
     setPjl(data)
-  } 
-
+  }
   
+  // clear form
+  const resetForm = () =>{
+    setName('')
+    setEmail('')
+    setDob('')
+    setSt('')
+    setGender('')
+    setPjl('')
+    setPimage('')
+    setRdoc('')
+    document.getElementById('resume-form').reset()
+  }
 
-
+  // Handle form Submission
+  const handleSubmit = (e) =>{
+    e.preventDefault()
+    const data = new FormData()
+    data.append('name',name)
+    data.append('email',email)
+    data.append('dob',dob)
+    data.append('st',st)
+    data.append('gender',gender)
+    data.append('pjl',pjl)
+    data.append('pimage',pimage)
+    data.append('rdoc',rdoc)
+    
+    if (name && email){
+      console.log(data.get('name'))
+      console.log(data.get('email'))
+      console.log(data.get('dob'))
+      console.log(data.get('st'))
+      console.log(data.get('gender'))
+      console.log(data.get('pjl'))
+      console.log(data.get('pimage'))
+      console.log(data.get('rdoc'))
+      setError({status:true, msg:"Uploaded Successfully", type:'success'})
+      resetForm()
+      
+    } else{
+      setError({status:true, msg:"All fields are required", type:'error'})
+    }
+  }
 
   return (
     <>
@@ -44,7 +94,7 @@ function App() {
       </Box>
       <Grid container justifyContent="center">
         <Grid item xs={5}>
-          <Box component="form" sx={{p:3}} noValidate id='resume-form'>
+          <Box component="form" sx={{p:3}} noValidate id='resume-form' onSubmit={handleSubmit}>
             <TextField
               id="name" name='name' required fullWidth margin='normal' label='Name' onChange={(e)=>{setName(e.target.value)}}
             />
@@ -81,16 +131,17 @@ function App() {
               </FormControl>
               <Stack direction='row' alignItems='center' spacing={4}>
                 <label htmlFor="profile-photo">
-                  <Input accept="image/*" id='profile-photo' type="file" />
+                  <Input accept="image/*" id='profile-photo' type="file" onChange={(e)=>{setPimage(e.target.files[0])}}/>
                   <Button variant='contained' component='span'>Upload Photo</Button>
                 </label>
                 <label htmlFor="resume-file">
-                  <Input accept="doc/*" id='resume-file' type="file" />
+                  <Input accept="doc/*" id='resume-file' type="file" onChange={(e)=>{setRdoc(e.target.files[0])}}/>
                   <Button variant='contained' component='span'>Upload File</Button>
                 </label>
               </Stack>
               <Box>
-                <Button type='submit' variant='contained' sx={{mt:3, mb:2, px:5}} color='error'>Submit</Button>  
+                <Button type='submit' variant='contained' sx={{mt:3, mb:2, px:5}} color='error'>Submit</Button>
+                {error.status ? <Alert severity={error.type}>{error.msg}</Alert>:''}  
               </Box>          
           </Box>
         </Grid>
