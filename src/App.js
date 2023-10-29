@@ -1,9 +1,10 @@
 import {Box, Typography, Grid, TableContainer, Table, Paper, Avatar,  TableCell, TableHead, TableBody, TableRow, TextField, FormControl, InputLabel, MenuItem, Select,FormControlLabel, Radio, FormLabel, RadioGroup, FormGroup, Checkbox, Stack, Button , Alert} from '@mui/material'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {styled} from '@mui/material/styles'
-import { parseISO, format } from 'date-fns';
+import { format } from 'date-fns';
+import { useSaveProfileMutation, useGetResumeprofileQuery } from './services/candidateProfileApi';
 
 
 
@@ -38,6 +39,10 @@ function App() {
     msg:"",
     type:"",
   })
+
+  const [candidates, setCandidates] = useState([])
+
+
   const getPjl = (e) =>{
     let data = pjl
     data.push(e.target.value)
@@ -57,28 +62,32 @@ function App() {
     document.getElementById('resume-form').reset()
   }
 
+  //RTK Query
+  const [saveProfile] = useSaveProfileMutation()
+  const {data, isSuccess} = useGetResumeprofileQuery()
+  useEffect(()=>{
+    if (data && isSuccess){
+      setCandidates(data.candidates)
+    }
+  }, [data, isSuccess])
+
+
   // Handle form Submission
-  const handleSubmit = (e) =>{
+  const handleSubmit = async (e) =>{
     e.preventDefault()
     const data = new FormData()
     data.append('name',name)
     data.append('email',email)
-    data.append('dob',dob)
-    data.append('st',st)
+    data.append('dob', dob==null? null: format(dob, 'yyyy-MM-dd'))
+    data.append('state',st)
     data.append('gender',gender)
-    data.append('pjl',pjl)
+    data.append('location',pjl)
     data.append('pimage',pimage)
     data.append('rdoc',rdoc)
     
     if (name && email){
-      console.log(data.get('name'))
-      console.log(data.get('email'))
-      console.log(data.get('dob'))
-      console.log(data.get('st'))
-      console.log(data.get('gender'))
-      console.log(data.get('pjl'))
-      console.log(data.get('pimage'))
-      console.log(data.get('rdoc'))
+      const res = await saveProfile(data)
+      if (res.data.status === "success")
       setError({status:true, msg:"Uploaded Successfully", type:'success'})
       resetForm()
       
@@ -109,8 +118,8 @@ function App() {
             <FormControl fullWidth margin='normal'>
               <InputLabel id ='state-select-label' >State</InputLabel>
               <Select labelId='state-select-label'  id='state-select' value={st} label='st' onChange={(e)=>{setSt(e.target.value)}}>
-                <MenuItem value="KE" >Kerala</MenuItem>
-                <MenuItem value="TN" >Tamil Nadu</MenuItem>
+                <MenuItem value="Kerala" >Kerala</MenuItem>
+                <MenuItem value="Tamil Nadu" >Tamil Nadu</MenuItem>
               </Select>
               
             </FormControl>
@@ -163,15 +172,21 @@ function App() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                <TableRow sx={{'&:last-child td, &last-child th': {border:0}}}>
-                  <TableCell component="th" scope="row" >Arun </TableCell>
-                  <TableCell align='center' >arunmr801@gmail.com </TableCell>
-                  <TableCell align='center' >8 May 1997 </TableCell>
-                  <TableCell align='center' >Kerala</TableCell>
-                  <TableCell align='center' >Male </TableCell>
-                  <TableCell align='center' >Bangalore </TableCell>
-                  <TableCell align='center' ><Avatar src="#"/></TableCell>
-                </TableRow>
+                {candidates.map((candidate, i) => {
+                  return (
+                    <TableRow key={i} sx={{ '&:last-child td, &last-child th': { border: 0 } }}>
+                      <TableCell component="th" scope="row">{candidate.name}</TableCell>
+                      <TableCell align='center'>{candidate.email}</TableCell>
+                      <TableCell align='center'>{candidate.dob}</TableCell>
+                      <TableCell align='center'>{candidate.state}</TableCell>
+                      <TableCell align='center'>{candidate.gender}</TableCell>
+                      <TableCell align='center'>{candidate.location}</TableCell>
+                      <TableCell align='center'>
+                        <Avatar src={`http://127.0.0.1:8000/${candidate.pimage}`} />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>
