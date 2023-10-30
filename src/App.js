@@ -182,7 +182,7 @@ function App() {
                       <TableCell align='center'>{candidate.gender}</TableCell>
                       <TableCell align='center'>{candidate.location}</TableCell>
                       <TableCell align='center'>
-                        <Avatar src={`http://127.0.0.1:8000/${candidate.pimage}`} />
+                        <Avatar src={`http://api.arunarchitect.in/${candidate.pimage}`} />
                       </TableCell>
                     </TableRow>
                   );
